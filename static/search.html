@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>在线检索公众号文章 - WeChat Download API</title>
+    <style>
+        :root {
+            --green: #07c160;
+            --green-dark: #06ad56;
+            --blue: #2563eb;
+            --red: #dc2626;
+            --orange: #f59e0b;
+            --text: #1f2329;
+            --muted: #667085;
+            --subtle: #98a2b3;
+            --line: #e5e7eb;
+            --soft: #f6f7f9;
+            --white: #fff;
+            --shadow: 0 8px 20px rgba(16, 24, 40, 0.06);
+            --radius: 8px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            min-height: 100vh;
+            background: #f3f4f6;
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+            line-height: 1.6;
+        }
+        .layout {
+            width: min(1180px, calc(100% - 32px));
+            margin: 0 auto;
+            padding: 24px 0 40px;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+        .title h1 { font-size: 24px; line-height: 1.25; }
+        .title p { color: var(--muted); font-size: 13px; margin-top: 4px; }
+        .back {
+            color: var(--muted);
+            text-decoration: none;
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 7px 14px;
+            background: var(--white);
+            font-size: 13px;
+            white-space: nowrap;
+        }
+        .back:hover { color: var(--green); border-color: var(--green); }
+        .grid {
+            display: grid;
+            grid-template-columns: 360px minmax(0, 1fr);
+            gap: 16px;
+            align-items: start;
+        }
+        .panel {
+            background: var(--white);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        .panel-head {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--line);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+        .panel-title { font-size: 15px; font-weight: 700; }
+        .panel-subtitle { color: var(--subtle); font-size: 12px; margin-top: 2px; }
+        .panel-body { padding: 16px; }
+        .form-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        input, select {
+            height: 38px;
+            border: 1px solid #d0d5dd;
+            border-radius: var(--radius);
+            outline: none;
+            padding: 0 12px;
+            font-size: 14px;
+            background: var(--white);
+            color: var(--text);
+            min-width: 0;
+        }
+        input:focus, select:focus {
+            border-color: var(--green);
+            box-shadow: 0 0 0 3px rgba(7, 193, 96, 0.11);
+        }
+        .grow { flex: 1; }
+        .btn {
+            height: 38px;
+            border: 1px solid transparent;
+            border-radius: var(--radius);
+            padding: 0 14px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 13px;
+            white-space: nowrap;
+            background: var(--white);
+            color: var(--text);
+        }
+        .btn-primary { background: var(--green); color: #fff; }
+        .btn-primary:hover { background: var(--green-dark); }
+        .btn-line { border-color: var(--line); color: var(--muted); }
+        .btn-line:hover { border-color: var(--green); color: var(--green); }
+        .btn-blue { background: var(--blue); color: #fff; }
+        .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+        .segmented {
+            display: flex;
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            overflow: hidden;
+            background: var(--soft);
+        }
+        .segmented button {
+            flex: 1;
+            height: 36px;
+            border: none;
+            background: transparent;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .segmented button.active {
+            background: var(--white);
+            color: var(--green);
+            font-weight: 700;
+        }
+        .author-list, .article-list, .update-list { list-style: none; }
+        .author-item {
+            display: grid;
+            grid-template-columns: 42px minmax(0, 1fr) auto;
+            gap: 10px;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--line);
+        }
+        .author-item:last-child { border-bottom: none; }
+        .avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: var(--soft);
+            object-fit: cover;
+        }
+        .author-name {
+            font-size: 14px;
+            font-weight: 700;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .author-alias {
+            color: var(--subtle);
+            font-size: 12px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin-top: 2px;
+        }
+        .mini {
+            height: 30px;
+            padding: 0 10px;
+            border-radius: 6px;
+            border: 1px solid var(--line);
+            background: var(--white);
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .mini:hover { border-color: var(--green); color: var(--green); }
+        .mini.active {
+            border-color: rgba(7, 193, 96, 0.25);
+            color: var(--green);
+            background: rgba(7, 193, 96, 0.08);
+        }
+        .article-item {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 104px;
+            gap: 14px;
+            padding: 16px;
+            border-bottom: 1px solid var(--line);
+        }
+        .article-item:last-child { border-bottom: none; }
+        .article-title {
+            color: var(--text);
+            text-decoration: none;
+            font-size: 17px;
+            font-weight: 700;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+        .article-title:hover { color: var(--green); }
+        .digest {
+            color: var(--muted);
+            font-size: 13px;
+            margin-top: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .meta {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+            color: var(--subtle);
+            font-size: 12px;
+        }
+        .source { color: #53658f; }
+        .cover {
+            width: 104px;
+            height: 78px;
+            border-radius: 6px;
+            object-fit: cover;
+            background: var(--soft);
+        }
+        .cover.empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--subtle);
+            font-size: 12px;
+        }
+        .actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+        .empty, .error, .loading {
+            padding: 34px 16px;
+            text-align: center;
+            color: var(--subtle);
+            font-size: 13px;
+        }
+        .error { color: var(--red); }
+        .notice {
+            margin-top: 12px;
+            padding: 10px 12px;
+            border-left: 3px solid var(--orange);
+            background: rgba(245, 158, 11, 0.08);
+            color: var(--muted);
+            font-size: 12px;
+            border-radius: 0 6px 6px 0;
+        }
+        .section-label {
+            margin-top: 16px;
+            padding-top: 14px;
+            border-top: 1px solid var(--line);
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .toolbar {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 140px 120px auto;
+            gap: 8px;
+            padding: 16px;
+            border-bottom: 1px solid var(--line);
+        }
+        .author-select-wrap { display: none; }
+        .author-select-wrap.visible { display: block; }
+        .result-summary {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--line);
+            color: var(--muted);
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid #dfe3ea;
+            border-top-color: var(--green);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            vertical-align: -2px;
+            margin-right: 6px;
+        }
+        .toast {
+            position: fixed;
+            top: 18px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-80px);
+            background: var(--text);
+            color: #fff;
+            border-radius: var(--radius);
+            padding: 10px 20px;
+            font-size: 13px;
+            transition: transform 0.24s ease;
+            pointer-events: none;
+            z-index: 30;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        .article-content-panel {
+            margin-top: 16px;
+            display: none;
+        }
+        .article-content-panel.visible { display: block; }
+        .article-content-body {
+            max-height: 660px;
+            overflow-y: auto;
+            padding: 20px;
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.9;
+        }
+        .article-content-body img { max-width: 100%; height: auto; border-radius: 4px; }
+        .update-group {
+            padding: 16px;
+            border-bottom: 1px solid var(--line);
+        }
+        .update-group:last-child { border-bottom: none; }
+        .update-title { font-weight: 700; margin-bottom: 8px; }
+        .update-group li {
+            margin-left: 18px;
+            color: var(--muted);
+            font-size: 13px;
+            padding: 3px 0;
+        }
+        .update-group a { color: var(--text); text-decoration: none; }
+        .update-group a:hover { color: var(--green); }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @media (max-width: 940px) {
+            .grid { grid-template-columns: 1fr; }
+            .toolbar { grid-template-columns: 1fr; }
+            .article-item { grid-template-columns: 1fr; }
+            .cover { width: 100%; height: 168px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <div class="header">
+            <div class="title">
+                <h1>在线检索公众号文章</h1>
+                <p>通过微信后台在线检索公众号发布文章；结果不是本地已下载列表。</p>
+            </div>
+            <a class="back" href="/admin.html">返回面板</a>
+        </div>
+
+        <div class="grid">
+            <aside class="panel">
+                <div class="panel-head">
+                    <div>
+                        <div class="panel-title">作者发现</div>
+                        <div class="panel-subtitle">搜索公众号作者并加入关注池</div>
+                    </div>
+                    <button class="mini" onclick="loadFollowedAuthors()">刷新</button>
+                </div>
+                <div class="panel-body">
+                    <div class="form-row">
+                        <input id="authorQuery" class="grow" placeholder="作者名 / 公众号名" onkeydown="if(event.key==='Enter')searchAuthors()">
+                        <button id="authorSearchBtn" class="btn btn-primary" onclick="searchAuthors()">搜索</button>
+                    </div>
+                    <ul id="authorResults" class="author-list">
+                        <li class="empty">输入作者名或公众号名，搜索微信后台可见的公众号列表。</li>
+                    </ul>
+                    <div class="notice">关注作者后，可以在右侧“关注池”里批量检索关键词，也可以查看昨日更新。</div>
+                    <div class="section-label">
+                        <span>已关注作者池</span>
+                        <span id="followedCount" style="color:var(--subtle);font-weight:400;">0 个</span>
+                    </div>
+                    <ul id="followedList" class="author-list">
+                        <li class="empty">暂无关注作者</li>
+                    </ul>
+                </div>
+            </aside>
+
+            <main>
+                <section class="panel">
+                    <div class="panel-head">
+                        <div>
+                            <div class="panel-title">文章在线检索</div>
+                            <div class="panel-subtitle">按公众号 fakeid 实时查询微信后台文章列表</div>
+                        </div>
+                        <button class="btn btn-line" onclick="loadYesterday()">昨日更新</button>
+                    </div>
+
+                    <div class="toolbar">
+                        <input id="keywordInput" placeholder="输入文章关键词，如 AI、融资、OpenAI" onkeydown="if(event.key==='Enter')searchArticles()">
+                        <select id="scopeSelect" onchange="syncScopeUi()">
+                            <option value="followed">关注池</option>
+                            <option value="author">指定作者</option>
+                            <option value="discover">自动发现作者</option>
+                        </select>
+                        <div id="authorSelectWrap" class="author-select-wrap">
+                            <select id="authorSelect"></select>
+                        </div>
+                        <button id="articleSearchBtn" class="btn btn-primary" onclick="searchArticles()">检索文章</button>
+                    </div>
+
+                    <div class="result-summary">
+                        <span id="resultSummary">等待检索。建议先在左侧关注几个作者，再用关注池检索。</span>
+                        <span id="resultMeta"></span>
+                    </div>
+                    <ul id="articleList" class="article-list">
+                        <li class="empty">这里会展示在线检索到的公众号文章列表。</li>
+                    </ul>
+                </section>
+
+                <section id="articleContentPanel" class="panel article-content-panel">
+                    <div class="panel-head">
+                        <div id="contentTitle" class="panel-title"></div>
+                        <button class="mini" onclick="closeArticleContent()">收起</button>
+                    </div>
+                    <div id="contentBody" class="article-content-body"></div>
+                </section>
+
+                <section id="yesterdayPanel" class="panel article-content-panel">
+                    <div class="panel-head">
+                        <div>
+                            <div class="panel-title">昨日更新汇总</div>
+                            <div id="yesterdayDate" class="panel-subtitle"></div>
+                        </div>
+                        <button class="mini" onclick="closeYesterday()">收起</button>
+                    </div>
+                    <div id="yesterdayBody"></div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        var followedAuthors = [];
+        var lastAuthorResults = [];
+
+        function escHtml(s) {
+            var d = document.createElement("div");
+            d.textContent = s || "";
+            return d.innerHTML;
+        }
+
+        function escAttr(s) {
+            return (s || "").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+        }
+
+        function showToast(msg) {
+            var t = document.getElementById("toast");
+            t.textContent = msg;
+            t.classList.add("show");
+            clearTimeout(t._timer);
+            t._timer = setTimeout(function() { t.classList.remove("show"); }, 1800);
+        }
+
+        function setButtonLoading(id, loading, text) {
+            var btn = document.getElementById(id);
+            btn.disabled = loading;
+            btn.innerHTML = loading ? '<span class="spinner"></span>' + text : text;
+        }
+
+        function formatTime(ts) {
+            if (!ts) return "-";
+            return new Date(ts * 1000).toLocaleString("zh-CN");
+        }
+
+        async function fetchJson(url, options) {
+            var res = await fetch(url, options || {});
+            var data = await res.json();
+            if (!data.success) {
+                throw new Error(data.error || (data.data && data.data.message) || "请求失败");
+            }
+            return data.data || {};
+        }
+
+        async function searchAuthors() {
+            var query = document.getElementById("authorQuery").value.trim();
+            if (!query) {
+                showToast("请输入作者名或公众号名");
+                return;
+            }
+            setButtonLoading("authorSearchBtn", true, "搜索");
+            document.getElementById("authorResults").innerHTML = '<li class="loading"><span class="spinner"></span>正在搜索作者...</li>';
+            try {
+                var data = await fetchJson("/api/online/authors?query=" + encodeURIComponent(query) + "&count=10");
+                lastAuthorResults = data.authors || [];
+                renderAuthors(lastAuthorResults, "authorResults", true);
+            } catch (e) {
+                document.getElementById("authorResults").innerHTML = '<li class="error">' + escHtml(e.message) + '</li>';
+            }
+            setButtonLoading("authorSearchBtn", false, "搜索");
+        }
+
+        function renderAuthors(authors, targetId, allowFollow) {
+            var el = document.getElementById(targetId);
+            if (!authors || authors.length === 0) {
+                el.innerHTML = '<li class="empty">没有找到作者</li>';
+                return;
+            }
+            el.innerHTML = authors.map(function(author) {
+                var avatar = author.round_head_img || "";
+                var btn = "";
+                if (allowFollow) {
+                    btn = author.subscribed
+                        ? '<button class="mini active" disabled>已关注</button>'
+                        : '<button class="mini" onclick="followAuthor(\'' + escAttr(author.fakeid) + '\')">关注</button>';
+                } else {
+                    btn = '<button class="mini" onclick="selectAuthorAndSearch(\'' + escAttr(author.fakeid) + '\')">检索</button>' +
+                          '<button class="mini" onclick="unfollowAuthor(\'' + escAttr(author.fakeid) + '\')">取消</button>';
+                }
+                return '' +
+                    '<li class="author-item">' +
+                    "<img class=\"avatar\" src=\"" + escAttr(avatar) + "\" alt=\"\" onerror=\"this.style.visibility='hidden'\">" +
+                    '<div><div class="author-name">' + escHtml(author.nickname || author.fakeid) + '</div>' +
+                    '<div class="author-alias">' + escHtml(author.alias || author.fakeid) + '</div></div>' +
+                    btn +
+                    '</li>';
+            }).join("");
+        }
+
+        async function followAuthor(fakeid) {
+            var author = lastAuthorResults.find(function(item) { return item.fakeid === fakeid; });
+            if (!author) return;
+            try {
+                await fetchJson("/api/online/follow-author", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        fakeid: author.fakeid,
+                        nickname: author.nickname || "",
+                        alias: author.alias || "",
+                        head_img: author.round_head_img || ""
+                    })
+                });
+                showToast("已关注 " + (author.nickname || author.fakeid));
+                author.subscribed = true;
+                renderAuthors(lastAuthorResults, "authorResults", true);
+                await loadFollowedAuthors();
+            } catch (e) {
+                showToast(e.message);
+            }
+        }
+
+        async function loadFollowedAuthors() {
+            try {
+                var data = await fetchJson("/api/online/followed-authors");
+                followedAuthors = data.authors || [];
+                syncAuthorSelect();
+                renderAuthors(followedAuthors, "followedList", false);
+                document.getElementById("followedCount").textContent = followedAuthors.length + " 个";
+            } catch (e) {
+                showToast(e.message);
+            }
+        }
+
+        async function unfollowAuthor(fakeid) {
+            try {
+                await fetchJson("/api/online/follow-author/" + encodeURIComponent(fakeid), { method: "DELETE" });
+                showToast("已取消关注");
+                await loadFollowedAuthors();
+            } catch (e) {
+                showToast(e.message);
+            }
+        }
+
+        function syncAuthorSelect() {
+            var select = document.getElementById("authorSelect");
+            if (!followedAuthors.length) {
+                select.innerHTML = '<option value="">暂无关注作者</option>';
+                return;
+            }
+            select.innerHTML = followedAuthors.map(function(author) {
+                return '<option value="' + escAttr(author.fakeid) + '">' + escHtml(author.nickname || author.fakeid) + '</option>';
+            }).join("");
+        }
+
+        function syncScopeUi() {
+            var scope = document.getElementById("scopeSelect").value;
+            document.getElementById("authorSelectWrap").classList.toggle("visible", scope === "author");
+        }
+
+        function selectAuthorAndSearch(fakeid) {
+            document.getElementById("scopeSelect").value = "author";
+            syncScopeUi();
+            document.getElementById("authorSelect").value = fakeid;
+            searchArticles();
+        }
+
+        async function searchArticles() {
+            var keyword = document.getElementById("keywordInput").value.trim();
+            var scope = document.getElementById("scopeSelect").value;
+            var fakeid = document.getElementById("authorSelect").value;
+            var authorName = document.getElementById("authorQuery").value.trim();
+            if (!keyword) {
+                showToast("请输入文章关键词");
+                return;
+            }
+            if (scope === "author" && !fakeid) {
+                showToast("请选择一个作者");
+                return;
+            }
+
+            setButtonLoading("articleSearchBtn", true, "检索文章");
+            closeArticleContent();
+            closeYesterday();
+            document.getElementById("resultSummary").innerHTML = '<span class="spinner"></span>正在在线检索...';
+            document.getElementById("resultMeta").textContent = "";
+            document.getElementById("articleList").innerHTML = '<li class="loading">正在从微信后台查询文章列表...</li>';
+
+            var params = new URLSearchParams({
+                keyword: keyword,
+                scope: scope,
+                count: "10",
+                max_authors: "5"
+            });
+            if (fakeid) params.set("fakeid", fakeid);
+            if (authorName) params.set("author_name", authorName);
+
+            try {
+                var data = await fetchJson("/api/search/articles?" + params.toString());
+                renderArticleResults(data);
+            } catch (e) {
+                document.getElementById("resultSummary").textContent = "检索失败";
+                document.getElementById("articleList").innerHTML = '<li class="error">' + escHtml(e.message) + '</li>';
+            }
+            setButtonLoading("articleSearchBtn", false, "检索文章");
+        }
+
+        function renderArticleResults(data) {
+            var articles = data.articles || [];
+            var authors = data.authors || [];
+            var errors = data.errors || [];
+            document.getElementById("resultSummary").innerHTML =
+                '关键词 “<strong>' + escHtml(data.keyword || "") + '</strong>” 找到 <strong>' + articles.length + '</strong> 篇文章';
+            document.getElementById("resultMeta").textContent =
+                '检索作者 ' + authors.length + ' 个' + (errors.length ? '，部分失败 ' + errors.length + ' 个' : '');
+            if (!articles.length) {
+                var errHtml = errors.length ? '<div class="notice">' + escHtml(errors.join("；")) + '</div>' : '';
+                document.getElementById("articleList").innerHTML = '<li class="empty">没有检索到文章。可以换作者范围或关键词。</li>' + errHtml;
+                return;
+            }
+            document.getElementById("articleList").innerHTML = articles.map(renderArticle).join("");
+        }
+
+        function renderArticle(article) {
+            var cover = article.cover
+                ? '<img class="cover" src="' + escAttr(article.cover) + '" alt="">'
+                : '<div class="cover empty">无图</div>';
+            var title = escHtml(article.title || "-");
+            var link = escAttr(article.link || "");
+            return '' +
+                '<li class="article-item">' +
+                '<div>' +
+                '<a class="article-title" href="' + link + '" target="_blank" rel="noopener noreferrer">' + title + '</a>' +
+                (article.digest ? '<div class="digest">' + escHtml(article.digest) + '</div>' : '') +
+                '<div class="meta">' +
+                '<span class="source">' + escHtml(article.source || article.fakeid || "") + '</span>' +
+                '<span>' + escHtml(formatTime(article.update_time || article.create_time)) + '</span>' +
+                (article.author ? '<span>作者：' + escHtml(article.author) + '</span>' : '') +
+                '</div>' +
+                '<div class="actions">' +
+                '<button class="mini" onclick="viewArticle(\'' + link + '\', \'' + escAttr(article.title || "-") + '\')">查看正文</button>' +
+                '<a class="mini" href="' + link + '" target="_blank" rel="noopener noreferrer" style="text-decoration:none;">打开链接</a>' +
+                '</div>' +
+                '</div>' +
+                cover +
+                '</li>';
+        }
+
+        async function viewArticle(url, title) {
+            if (!url) return;
+            var panel = document.getElementById("articleContentPanel");
+            panel.classList.add("visible");
+            document.getElementById("contentTitle").textContent = title;
+            document.getElementById("contentBody").innerHTML = '<div class="loading"><span class="spinner"></span>正在获取文章正文...</div>';
+            panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+            try {
+                var res = await fetch("/api/article", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ url: url })
+                });
+                var data = await res.json();
+                if (data.success && data.data && data.data.content) {
+                    document.getElementById("contentBody").innerHTML = data.data.content;
+                } else {
+                    document.getElementById("contentBody").innerHTML = '<div class="error">获取失败：' + escHtml(data.error || "未知错误") + '</div>';
+                }
+            } catch (e) {
+                document.getElementById("contentBody").innerHTML = '<div class="error">网络错误：' + escHtml(e.message) + '</div>';
+            }
+        }
+
+        function closeArticleContent() {
+            document.getElementById("articleContentPanel").classList.remove("visible");
+        }
+
+        async function loadYesterday() {
+            closeArticleContent();
+            var panel = document.getElementById("yesterdayPanel");
+            panel.classList.add("visible");
+            document.getElementById("yesterdayDate").textContent = "";
+            document.getElementById("yesterdayBody").innerHTML = '<div class="loading"><span class="spinner"></span>正在查询关注作者昨日更新...</div>';
+            panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+            try {
+                var data = await fetchJson("/api/online/yesterday?count=20");
+                document.getElementById("yesterdayDate").textContent = data.date + "，共 " + data.total + " 篇";
+                renderYesterday(data);
+            } catch (e) {
+                document.getElementById("yesterdayBody").innerHTML = '<div class="error">' + escHtml(e.message) + '</div>';
+            }
+        }
+
+        function renderYesterday(data) {
+            var updates = data.updates || [];
+            if (!updates.length) {
+                document.getElementById("yesterdayBody").innerHTML = '<div class="empty">关注作者昨天没有检索到更新。</div>';
+                return;
+            }
+            document.getElementById("yesterdayBody").innerHTML = updates.map(function(group) {
+                return '<div class="update-group">' +
+                    '<div class="update-title">' + escHtml(group.nickname) + ' · ' + group.count + ' 篇</div>' +
+                    '<ul>' + (group.articles || []).map(function(article) {
+                        return '<li><a href="' + escAttr(article.link || "") + '" target="_blank" rel="noopener noreferrer">' + escHtml(article.title || "-") + '</a></li>';
+                    }).join("") + '</ul>' +
+                    '</div>';
+            }).join("");
+        }
+
+        function closeYesterday() {
+            document.getElementById("yesterdayPanel").classList.remove("visible");
+        }
+
+        window.addEventListener("load", function() {
+            loadFollowedAuthors();
+            syncScopeUi();
+            document.getElementById("authorQuery").focus();
+        });
+    </script>
+</body>
+</html>
