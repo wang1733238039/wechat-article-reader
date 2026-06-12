@@ -7,10 +7,9 @@ Cursor Agent Skill — 微信公众号文章读取器。
 ## 安装
 
 ```bash
+npm i -g skills
 npx skills add wang1733238039/wechat-article-reader@wechat-article-reader -g -y
 ```
-
-> 需要先安装 [Skills CLI](https://github.com/nicolevanderhoeven/skills-cli): `npm i -g skills`
 
 ## 本地开发
 
@@ -25,8 +24,6 @@ uv sync
 ```bash
 uv run python skills/wechat-article-reader/scripts/read_wechat_article.py "https://mp.weixin.qq.com/s/..."
 ```
-
-## 技术栈
 
 - Python 3.10+
 - [curl-cffi](https://github.com/IFE-TEAM/curl-cffi) — 浏览器指纹请求

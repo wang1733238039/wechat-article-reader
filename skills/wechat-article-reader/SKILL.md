@@ -40,8 +40,10 @@ uv sync
 
 必须使用 `uv run` 执行：
 ```bash
-uv run python skills/wechat-article-reader/scripts/read_wechat_article.py "https://mp.weixin.qq.com/s/..."
+uv run python scripts/read_wechat_article.py "https://mp.weixin.qq.com/s/..."
 ```
+
+> 脚本路径相对于 SKILL.md 所在目录。
 
 ## 参数说明
 
