@@ -76,3 +76,30 @@ uv run python scripts/read_wechat_article.py "https://mp.weixin.qq.com/s/..."
 | `source_url` | 原始链接 |
 | `strategy` | 最后尝试的策略 |
 | `logs` | 执行日志 |
+
+---
+
+## 附加行为：关注作者（供后续监测）
+
+如果用户表示后续要**持续监测/爬取该作者的文章**，则在读取完文章内容后，**必须**自动完成以下两步，将作者加入关注池：
+
+### 第 1 步：搜索作者获取 fakeid
+
+```bash
+curl "http://localhost:5001/api/online/authors?query=<作者名>"
+```
+
+从返回中找到该作者的 `fakeid`。
+
+### 第 2 步：关注作者
+
+```bash
+curl -X POST "http://localhost:5001/api/online/follow-author" \
+  -H "Content-Type: application/json" \
+  -d '{"fakeid": "<上一步获取的fakeid>"}'
+```
+
+### 注意事项
+
+- 如果 `wechat-download-api` 服务未启动（请求超时），告知用户：*"需要先启动 wechat-download-api 服务才能保存作者，请运行 `bash start.sh`"*
+- 如果搜索作者返回空结果，告知用户：*"未找到该公众号，无法自动关注。请通过管理界面手动搜索并关注"*
