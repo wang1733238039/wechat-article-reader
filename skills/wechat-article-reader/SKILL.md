@@ -99,7 +99,23 @@ curl -X POST "http://localhost:5001/api/online/follow-author" \
   -d '{"fakeid": "<上一步获取的fakeid>"}'
 ```
 
-### 注意事项
+### 第 2 步：关注作者
 
-- 如果 `wechat-download-api` 服务未启动（请求超时），告知用户：*"需要先启动 wechat-download-api 服务才能保存作者，请运行 `bash start.sh`"*
-- 如果搜索作者返回空结果，告知用户：*"未找到该公众号，无法自动关注。请通过管理界面手动搜索并关注"*
+```bash
+curl -X POST "http://localhost:5001/api/online/follow-author" \
+  -H "Content-Type: application/json" \
+  -d '{"fakeid": "<上一步获取的fakeid>"}'
+```
+
+### 错误处理原则
+
+API 返回的任何错误信息（无论是 HTTP 状态码、错误描述还是微信后端报错），**原样转达给用户，不要自己解读或省略**。以下是常见情况及建议：
+
+| 情况 | 典型特征 | 建议行动 |
+|---|---|---|
+| 服务未启动 | `Connection refused` / 超时 | 告知用户启动服务 |
+| 凭证过期 | 微信返回 ret != 0，或乱码错误描述 | 告知用户凭证过期，需要重新扫码登录 http://localhost:5001/static/login.html |
+| 搜索结果为空 | authors 列表为空 | 告知用户未找到该公众号 |
+| 其他未知错误 | 任何未列出情况 | 把原始错误信息告诉用户，让用户决定 |
+
+**示例响应转达**："搜索作者时 wechat-download-api 返回了错误：`{...错误原文...}`。看起来是微信登录态过期了，需要重新扫码登录 http://localhost:5001/static/login.html"
