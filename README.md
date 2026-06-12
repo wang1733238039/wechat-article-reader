@@ -1,18 +1,16 @@
 <div align="center">
 
-# WeChat Download API
+# WeChat Article API
 
 ### 微信公众号文章获取 & RSS 订阅服务
 
-**完全开源 | 免费部署 | RSS 订阅 | 文章抓取 | 反风控**
+**开源免费 | RSS 订阅 | 文章抓取 | 反风控**
 
-[![GitHub stars](https://img.shields.io/github/stars/tmwgsicp/wechat-download-api?style=for-the-badge&logo=github)](https://github.com/tmwgsicp/wechat-download-api/stargazers)
 [![License](https://img.shields.io/badge/License-AGPL%203.0-blue?style=for-the-badge)](LICENSE)
-[![Docker Pulls](https://img.shields.io/docker/pulls/tmwgsicp/wechat-download-api?style=for-the-badge&logo=docker&logoColor=white)](https://hub.docker.com/r/tmwgsicp/wechat-download-api)
 [![Python](https://img.shields.io/badge/Python-3.8+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 
-> **100% 开源，100% 免费。** 代码完全公开，私有化部署无任何限制，不搞"开源"之名行收费之实。
+> 代码完全开源，私有化部署无任何限制。
 
 </div>
 
@@ -41,14 +39,14 @@
 
 ---
 
-## Docker 部署 🐳
+## Docker 部署
 
 **最快速的部署方式**，无需配置 Python 环境，一键启动：
 
 ```bash
 # 方式一：使用 docker-compose（推荐）
-git clone https://github.com/tmwgsicp/wechat-download-api.git
-cd wechat-download-api
+git clone https://github.com/wang1733238039/wechat-article-reader.git
+cd wechat-article-reader
 cp env.example .env
 # 编辑 .env 设置 SITE_URL 为实际访问地址
 docker-compose up -d
@@ -59,7 +57,7 @@ docker run -d \
   -v $(pwd)/data:/app/data \
   -v $(pwd)/.env:/app/.env \
   --name wechat-api \
-  tmwgsicp/wechat-download-api:latest
+  wang1733238039/wechat-article-reader:latest
 ```
 
 服务启动后访问 `http://localhost:5001/login.html` 扫码登录即可使用。
@@ -88,8 +86,8 @@ docker run -d \
 
 ```bash
 # 1. 克隆项目
-git clone https://github.com/tmwgsicp/wechat-download-api.git
-cd wechat-download-api
+git clone https://github.com/wang1733238039/wechat-article-reader.git
+cd wechat-article-reader
 
 # 2. 配置环境变量
 cp env.example .env
@@ -107,8 +105,8 @@ docker-compose logs -f
 **第一步：克隆项目**
 
 ```bash
-git clone https://github.com/tmwgsicp/wechat-download-api.git
-cd wechat-download-api
+git clone https://github.com/wang1733238039/wechat-article-reader.git
+cd wechat-article-reader
 ```
 
 **第二步：一键启动**
@@ -160,8 +158,8 @@ bash status.sh
 bash stop.sh
 
 # 手动操作
-sudo systemctl restart wechat-download-api
-sudo systemctl status wechat-download-api
+sudo systemctl restart wechat-article-reader
+sudo systemctl status wechat-article-reader
 ```
 
 ### 配置反向代理（可选）
@@ -392,17 +390,17 @@ cp env.example .env
 | `HOST` | 监听地址 | 0.0.0.0 |
 | `DEBUG` | 调试模式（开启热重载） | false |
 
-> **⚠️ 重要**: `SITE_URL` 必须配置为实际访问地址（IP或域名），否则RSS图片无法正常显示。例如：
+> **重要**: `SITE_URL` 必须配置为实际访问地址（IP或域名），否则RSS图片无法正常显示。例如：
 > - 本地开发: `http://localhost:5001`
 > - 局域网部署: `http://192.168.1.100:5001`
 > - 公网域名: `https://你的域名.com`
 
-### SOCKS5 代理池配置（⚠️ 强烈建议）
+### SOCKS5 代理池配置（强烈建议）
 
-**重要提示**: 
-- ⚠️ **启用完整内容获取时，强烈建议配置代理池，避免账号被微信风控**
-- ⚠️ **不配置代理直连微信可能导致：频繁验证、账号限制、IP封禁**
-- ✅ **配置2-3个代理IP可有效分散请求，降低风控风险**
+**重要提示**:
+- **启用完整内容获取时，强烈建议配置代理池，避免账号被微信风控**
+- **不配置代理直连微信可能导致：频繁验证、账号限制、IP封禁**
+- **配置2-3个代理IP可有效分散请求，降低风控风险**
 
 **用途**：获取文章完整内容时分散请求 IP，配合 Chrome TLS 指纹模拟，有效规避微信风控。
 
@@ -416,13 +414,7 @@ cp env.example .env
 
 ```bash
 # 下载最新版（以 Linux amd64 为例，其他架构请去 GitHub Releases 页面选择）
-# 国外服务器直接下载
 wget https://github.com/go-gost/gost/releases/download/v3.2.6/gost_3.2.6_linux_amd64.tar.gz
-
-# 国内服务器使用加速镜像（任选一个可用的）
-wget https://gh-proxy.com/https://github.com/go-gost/gost/releases/download/v3.2.6/gost_3.2.6_linux_amd64.tar.gz
-# 或
-wget https://ghproxy.cc/https://github.com/go-gost/gost/releases/download/v3.2.6/gost_3.2.6_linux_amd64.tar.gz
 
 # 解压并移动到系统路径
 tar -xzf gost_3.2.6_linux_amd64.tar.gz
@@ -616,42 +608,9 @@ Cookie 登录有效期约 4 天，系统会：
 
 ## 参与贡献
 
-由于个人精力有限，目前**暂不接受 PR**，但非常欢迎：
-
 - **提交 Issue** — 报告 Bug、提出功能建议
 - **Fork 项目** — 自由修改和定制
 - **Star 支持** — 给项目点 Star，让更多人看到
-
----
-
-## 联系方式
-
-<table>
-  <tr>
-    <td align="center">
-      <img src="assets/qrcode/wechat.jpg" width="200"><br>
-      <b>个人微信</b><br>
-      <em>技术交流 · 商务合作</em>
-    </td>
-    <td align="center">
-      <img src="assets/qrcode/sponsor.jpg" width="200"><br>
-      <b>赞赏支持</b><br>
-      <em>开源不易，感谢支持</em>
-    </td>
-  </tr>
-</table>
-
-- **GitHub Issues**: [提交问题](https://github.com/tmwgsicp/wechat-download-api/issues)
-- **邮箱**: creator@waytomaster.com
-
----
-
-## 致谢
-
-- [FastAPI](https://fastapi.tiangolo.com/) — 高性能 Python Web 框架
-- [curl_cffi](https://github.com/lexiforest/curl_cffi) — 支持浏览器 TLS 指纹模拟的 HTTP 客户端
-- [HTTPX](https://www.python-httpx.org/) — 现代化 HTTP 客户端
-- [gost](https://github.com/go-gost/gost) — 轻量级代理工具
 
 ---
 
@@ -659,8 +618,6 @@ Cookie 登录有效期约 4 天，系统会：
 
 **如果觉得项目有用，请给个 Star 支持一下！**
 
-[![Star History Chart](https://api.star-history.com/svg?repos=tmwgsicp/wechat-download-api&type=Date)](https://star-history.com/#tmwgsicp/wechat-download-api&Date)
-
-Made with ❤️ by [tmwgsicp](https://github.com/tmwgsicp)
+[![Star History Chart](https://api.star-history.com/svg?repos=wang1733238039/wechat-article-reader&type=Date)](https://star-history.com/#wang1733238039/wechat-article-reader&Date)
 
 </div>

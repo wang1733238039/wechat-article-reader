@@ -1,6 +1,6 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright (C) 2026 tmwgsicp
+# Copyright (C) 2026 wang1733238039
 # Licensed under the GNU Affero General Public License v3.0
 # See LICENSE file in the project root for full license text.
 # SPDX-License-Identifier: AGPL-3.0-only
@@ -125,3 +125,4 @@ async def get_account_info(
             success=False,
             error=f"服务器内部错误: {str(e)}"
         )
+

@@ -61,7 +61,7 @@ Write-Host "Starting WeChat Download API..."
 
 # 先杀掉旧进程
 Get-Process python -ErrorAction SilentlyContinue | Where-Object {
-    $_.Path -like "*wechat-download-api*" -or $_.Path -like "*venv*"
+    $_.Path -like "*wechat-article-reader*" -or $_.Path -like "*venv*"
 } | Stop-Process -Force -ErrorAction SilentlyContinue
 
 Start-Sleep 1

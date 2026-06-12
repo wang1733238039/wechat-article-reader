@@ -14,10 +14,10 @@
 
 services:
   wechat-api:
-    image: tmwgsicp/wechat-download-api:latest
+    image: wang1733238039/wechat-article-reader:latest
     # Or build locally:
     # build: .
-    container_name: wechat-download-api
+    container_name: wechat-article-reader
     restart: unless-stopped
     ports:
       - "5001:5000"

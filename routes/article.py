@@ -1,6 +1,6 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright (C) 2026 tmwgsicp
+# Copyright (C) 2026 wang1733238039
 # Licensed under the GNU Affero General Public License v3.0
 # See LICENSE file in the project root for full license text.
 # SPDX-License-Identifier: AGPL-3.0-only
@@ -141,3 +141,4 @@ async def get_article(article_request: ArticleRequest, request: Request):
         if "timeout" in error_str.lower():
             return {"success": False, "error": "请求超时，请稍后重试"}
         return {"success": False, "error": f"处理请求时发生错误: {error_str}"}
+

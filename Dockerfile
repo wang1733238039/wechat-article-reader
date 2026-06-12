@@ -19,7 +19,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
 
 FROM python:3.11-slim
 
-LABEL maintainer="tmwgsicp"
+LABEL maintainer="wang1733238039"
 LABEL description="WeChat Official Account Article Download API with RSS Support"
 LABEL version="1.0.5"
 
