@@ -1,0 +1,11 @@
+{
+  "name": "wechat-article-reader",
+  "version": "1.0.0",
+  "description": "Cursor Agent Skill - 微信公众号文章读取",
+  "skills": [
+    {
+      "name": "wechat-article-reader",
+      "dir": "skills/wechat-article-reader"
+    }
+  ]
+}
