@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Copyright (C) 2026 wang1733238039
 # Licensed under the GNU Affero General Public License v3.0
